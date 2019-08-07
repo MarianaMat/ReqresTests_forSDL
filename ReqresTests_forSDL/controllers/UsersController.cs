@@ -67,20 +67,5 @@ namespace ReqresTestProject_SDL.controllers
 
         }
 
-
-
-
-        //public static IList<FullUserProfile> GetFullUserProfileFromResponse(IRestResponse response) 
-        //{
-        //    var jsonResponse = JObject.Parse(response.Content);
-        //    var UsersList = JsonConvert.DeserializeObject<List<FullUserProfile>>(jsonResponse["data"].ToString());
-
-        //    return UsersList;
-        //}
-
-        
-
-
-        // Patch update /api/users/2
     }
 }
