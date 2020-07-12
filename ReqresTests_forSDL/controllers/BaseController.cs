@@ -1,23 +1,20 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Reqres_APITests.utils;
 using RestSharp;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ReqresTests_forSDL;
+using System;
 
-namespace ReqresTestProject_SDL.controllers
+namespace Reqres_APITests.controllers
 {
     abstract class BaseController
     {
-            public MyRestClient MyRestClient;
-            public BaseController()
-            {
-             MyRestClient = new MyRestClient();
-            }
-        protected T GetDtoFromResponse<T>(IRestResponse response) {
+        public MyRestClient MyRestClient;
+        public BaseController()
+        {
+            MyRestClient = new MyRestClient();
+        }
+        protected T GetDtoFromResponse<T>(IRestResponse response)
+        {
             var jsonResponse = JObject.Parse(response.Content);
             return JsonConvert.DeserializeObject<T>(jsonResponse.ToString());
         }

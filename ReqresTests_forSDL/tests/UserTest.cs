@@ -1,8 +1,9 @@
 using FluentAssertions;
 using NUnit.Framework;
-using ReqresTestProject_SDL.controllers;
+using Reqres_APITests.controllers;
+using System;
 
-namespace Tests
+namespace Reqres_APITests.tests
 {
     public class UserTests
     {
@@ -15,55 +16,66 @@ namespace Tests
         {
             var page = 2;
             var usersListPageResult = userController.GetListOfUsers(page);
-            Assert.AreEqual(usersListPageResult.Page, page);
+            Assert.Multiple(() =>
+            {
+                usersListPageResult.Page.Should().Be(page);
+                usersListPageResult.Data.Count.Should().BeGreaterThan(0);
+            });          
         }
+        
+        [Test]
+        public void GetExistingUserData()
+        {
+            var userId = "2";
+            var userData = userController.GetUserProfile(userId);
+            userData.Id.Should().Be(userId);
+        }
+
         [Test]
         public void FindUserAtTheList()
         {
-            var page = 2;
-            var expectedUserId = "4";
-            var usersListPageResult = userController.GetListOfUsers(page);
-            var userOnTheList = userController.IsUserAtTheListOfUsers(usersListPageResult, expectedUserId);
-            Assert.IsTrue(userOnTheList);
+            var expectedUserId = "7";
+            Assert.That(userController.CheckIsUserExistAtTheListOfUsers( expectedUserId));
         }
 
         [Test]
-        public void CreateUser_returns_UserId()
+        public void CreateUserRequestReturnsUserIdAndCreatedAtDate()
         {
-            var user = userController.CreateUser(userName, job);
-            user.Id.Should().NotBeNullOrEmpty();
-            user.CreatedAt.Should().NotBe(user.UpdatedAt);
+            var testStartingTime = DateTime.UtcNow;
+            var createdUserData = userController.CreateUser(userName, job);
+            var requestComplitedTime = DateTime.UtcNow;
+            var userCreatedTime = createdUserData.CreatedAt;
+            Assert.Multiple(() =>
+            {
+                createdUserData.Id.Should().NotBeNullOrEmpty();
+                userCreatedTime.Should().BeAfter(testStartingTime).And.BeBefore(requestComplitedTime);
+            });
         }
 
         [Test]
-        public void CreateUser_returns_CreatedAtValue()
+        public void UpdateUserAttributeAndVerifyCareteAndUpdateDate()
         {
-            var user = userController.CreateUser(userName, job);
-            user.CreatedAt.Should().NotBe(user.UpdatedAt);
-        }
+            var newJobTitle = "AQA";
+            var createdUser = userController.CreateUser(userName, job);
+            createdUser.Job = newJobTitle;           
+            var updateUserResponseData = userController.UpdateUser(createdUser);
+            var userData = userController.GetUserProfile(createdUser.Id);
 
-        [Test]
-        public void UpdateUserAttribute()
-        {
-            var user = userController.CreateUser(userName, job);
-            user.Job = "AQA";
-            user = userController.UpdateUser(user);
-            Assert.IsTrue(user.Job == "AQA");
-        }
-
-        [Test]
-        public void UpdateUserAttributeValidateUpdatedAt()
-        {
-            var user = userController.CreateUser(userName, job);
-            user.Job = "AQA";
-            user = userController.UpdateUser(user);
-            user.UpdatedAt.Should().BeAfter(user.CreatedAt);
+            Assert.Multiple(() =>
+            {
+                updateUserResponseData.Job.Should().Be(newJobTitle);
+                userData.Job.Should().Be(newJobTitle);
+                userData.CreatedAt.Should().Be(createdUser.CreatedAt);
+                userData.UpdatedAt.Should().BeAfter(createdUser.UpdatedAt);
+            });
         }
 
        [Test]
         public void DeleteUser() {
             var user = userController.CreateUser(userName, job);
             userController.DeleteUser(user.Id);
+            var response = userController.MakeGetUserApiCall(user.Id);
+            Assert.That((int)response.StatusCode == 404, $"Unexpected status code for deleted user : '{response.StatusCode}'");
         }
 
     }

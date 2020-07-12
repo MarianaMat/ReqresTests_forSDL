@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace ReqresTests_forSDL 
+namespace Reqres_APITests.dtos
 {
     class UserProfileDto 
     {

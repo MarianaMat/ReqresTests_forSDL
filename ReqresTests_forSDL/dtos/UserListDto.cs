@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ReqresTests_forSDL
+﻿namespace Reqres_APITests.dtos
 {
-    class UserFromListDto 
+    class UserListDto 
     {
         public string Id { get; set; }
         public string Email { get; set; }

@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using RestSharp;
+﻿using RestSharp;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace ReqresTests_forSDL
+namespace Reqres_APITests.utils
 {
     class MyRestClient
     {
@@ -13,7 +10,6 @@ namespace ReqresTests_forSDL
         public MyRestClient()
         {
             this.client = new RestClient("https://reqres.in/");
-
         }
 
         public IRestResponse GET(String endpoint)
@@ -45,13 +41,10 @@ namespace ReqresTests_forSDL
             var request = BuildRequest(endpoint, Method.DELETE);
             return client.Execute(request);
         }
-
         private RestRequest BuildRequest(String endpoint, Method method)
         {
             var request = new RestRequest(endpoint, method);
             return request;
         }
-
-
     }
 }

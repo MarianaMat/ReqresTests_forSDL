@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace ReqresTests_forSDL.dtos
+namespace Reqres_APITests.dtos
 {
     class UsersListPageResult
     {
@@ -10,6 +8,6 @@ namespace ReqresTests_forSDL.dtos
         public int Per_page { get; set; }
         public int Total { get; set; }
         public int Total_pages { get; set; }
-        public List<UserFromListDto> Data { get; set; }
+        public List<UserListDto> Data { get; set; }
     }
 }

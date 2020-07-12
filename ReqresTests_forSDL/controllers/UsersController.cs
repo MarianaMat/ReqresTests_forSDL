@@ -1,42 +1,43 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using ReqresTests_forSDL;
-using ReqresTests_forSDL.dtos;
+﻿using Reqres_APITests.dtos;
 using RestSharp;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace ReqresTestProject_SDL.controllers
+namespace Reqres_APITests.controllers
 {
     class UsersController : BaseController
     {
-        string endpoint;
+        readonly string endpoint;
         public UsersController()
         {
             endpoint = "/api/users";
         }
-        
-        public UsersListPageResult GetListOfUsers(int page) {
-            var response = MyRestClient.GET(endpoint+ "?page=" + page.ToString());
+
+        public UsersListPageResult GetListOfUsers(int page = 1)
+        {
+            var response = MyRestClient.GET(endpoint + "?page=" + page.ToString());
             VerifyStatusCode(response, 200);
             return GetDtoFromResponse<UsersListPageResult>(response);
         }
 
-        public bool IsUserAtTheListOfUsers(UsersListPageResult page, String id) {
-            try
+        public bool CheckIsUserExistAtTheListOfUsers(string userId)
+        {
+            var currentPage = 1;
+            UsersListPageResult usersListPageResult;
+            int? pages = null;
+            do
             {
-                var user = page.Data.First(s => s.Id == id);
-                return true;
+                usersListPageResult = GetListOfUsers(currentPage);
+                if (usersListPageResult.Data.Any(s => s.Id == userId)) { return true; }
+                pages = usersListPageResult.Total_pages;
+                currentPage += 1;
             }
-            catch { new InvalidOperationException("Sequence contains no matching element");
-                return false;
-            }
-            
+            while (currentPage == pages);
+
+            return false;
         }
- 
-        public UserProfileDto CreateUser(String name, String job)
+
+        public UserProfileDto CreateUser(string name, string job, int expectedStatusCode = 201)
         {
             var shortDto = new UserProfileDto
             {
@@ -44,27 +45,36 @@ namespace ReqresTestProject_SDL.controllers
                 Job = job
             };
             var response = MyRestClient.POST(endpoint, shortDto);
-            VerifyStatusCode(response, 201);
+            VerifyStatusCode(response, expectedStatusCode);
+            return GetDtoFromResponse<UserProfileDto>(response);
+        }
+        public IRestResponse MakeGetUserApiCall(string userId)
+        {
+            return MyRestClient.GET(endpoint + userId);
+        }
+
+        public UserProfileDto GetUserProfile(string userId)
+        {
+            var response = MakeGetUserApiCall(userId);
             return GetDtoFromResponse<UserProfileDto>(response);
         }
 
-        public UserProfileDto UpdateUser(UserProfileDto userDto)
+        public UserProfileDto UpdateUser(UserProfileDto userDto, int expectedStatusCode = 200)
         {
-            var response = MyRestClient.PUT(endpoint+userDto.Id, userDto);
-            VerifyStatusCode(response, 200);
+            var response = MyRestClient.PUT(endpoint + userDto.Id, userDto);
+            VerifyStatusCode(response, expectedStatusCode);
             return GetDtoFromResponse<UserProfileDto>(response);
         }
-        public UserProfileDto PatchUser(UserProfileDto userDto)
+        public UserProfileDto PatchUser(UserProfileDto userDto, int expectedStatusCode = 200)
         {
             var response = MyRestClient.PATCH(endpoint + userDto.Id, userDto);
-            VerifyStatusCode(response, 200);
+            VerifyStatusCode(response, expectedStatusCode);
             return GetDtoFromResponse<UserProfileDto>(response);
         }
-        public void DeleteUser(String userId)
+        public void DeleteUser(String userId, int expectedStatusCode = 204)
         {
             var response = MyRestClient.DELETE(endpoint + userId);
-            VerifyStatusCode(response, 204);
-
+            VerifyStatusCode(response, expectedStatusCode);
         }
 
     }
